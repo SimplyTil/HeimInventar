@@ -1,0 +1,171 @@
+[v-cloak] {
+    display: none !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.toast-enter-active {
+    animation: toastSlideIn 0.3s ease-out forwards;
+}
+
+.toast-leave-active {
+    animation: toastSlideIn 0.3s ease-in reverse forwards;
+}
+
+/* Slide Fade Transition for Filter Panel */
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.25s ease-in;
+}
+
+.slide-fade-enter-from {
+    opacity: 0;
+}
+
+.slide-fade-enter-from > div {
+    transform: translateX(100%);
+}
+
+.slide-fade-leave-to {
+    opacity: 0;
+}
+
+.slide-fade-leave-to > div {
+    transform: translateX(100%);
+}
+
+/* Slide Down Transition for Mobile Search */
+.slide-down-enter-active,
+.slide-down-leave-active {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-down-enter-from {
+    transform: translateY(-10px);
+    opacity: 0;
+    max-height: 0;
+}
+
+.slide-down-enter-to {
+    transform: translateY(0);
+    opacity: 1;
+    max-height: 100px;
+}
+
+.slide-down-leave-from {
+    transform: translateY(0);
+    opacity: 1;
+    max-height: 100px;
+}
+
+.slide-down-leave-to {
+    transform: translateY(-10px);
+    opacity: 0;
+    max-height: 0;
+}
+
+/* Utilities */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dark .glass-panel {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+}
+
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Form Elements */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* Hide number input arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
