@@ -6,10 +6,6 @@ Ein intelligentes Haushalts-Inventarsystem zur Verwaltung von Lebensmitteln mit 
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0.0-lightgrey.svg)
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.8+-green.svg)
-![Flask](https://img.shields.io/badge/Flask-3.0.0-lightgrey.svg)
-
 ## 📋 Inhaltsverzeichnis
 
 - [Features](#-features)
@@ -100,21 +96,40 @@ venv\Scripts\activate  # Windows
 
 3. **Dependencies installieren**
 ```bash
-pip install flask requests
+pip install -r requirements.txt
+# Oder manuell:
+# pip install flask requests gunicorn
 ```
 
 4. **Server starten**
+
+**Entwicklung (Testing):**
 ```bash
 python app.py
 ```
 
+**Production (Raspberry Pi 24/7):**
+```bash
+gunicorn -w 4 -b 0.0.0.0:5000 app:app
+# -w 4 = 4 Worker-Prozesse (für Raspberry Pi 4)
+# -w 2 = für Raspberry Pi Zero/3
+```
+
 Die Datenbank wird automatisch beim ersten Start erstellt.
-Server läuft auf: `http://localhost:5000`
 
 ### Für Netzwerk-Zugriff (Raspberry Pi)
 Die App ist bereits für 0.0.0.0 konfiguriert, sodass du von jedem Gerät im Netzwerk zugreifen kannst:
 ```
 http://<raspberry-pi-ip>:5000
+```
+
+**Production-Server mit Gunicorn (empfohlen):**
+```bash
+# Mehr Worker für bessere Performance
+gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app
+
+# Mit Logging
+gunicorn -w 4 -b 0.0.0.0:5000 --access-logfile - --error-logfile - app:app
 ```
 
 ## 📖 Verwendung
@@ -491,44 +506,69 @@ CREATE TABLE shopping_list (
 
 1. **System aktualisieren**
 ```bash
-Start the server:
+sudo apt update && sudo apt upgrade -y
+sudo apt install python3 python3-pip python3-venv -y
+```
+
+2. **Projekt kopieren**
+```bash
+cd /home/pi
+# Projekt-Dateien hierher kopieren
+cd HeimInventar
+```
+
+3. **Virtuelle Umgebung erstellen**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+4. **Server starten**
+
+**Testing (Development):**
 ```bash
 python app.py
 ```
 
-You should see output indicating the server is running on `http://0.0.0.0:5000`.
-
-### Step 5: Access the App
-- **On the Pi**: Open Chromium and go to `http://localhost:5000`.
-- **On your Smartphone**: 
-    1. Find your Pi's IP address (run `hostname -I` in the terminal).
-    2. Open Chrome on your phone.
-    3. Navigate to `http://<YOUR_PI_IP>:5000` (e.g., `http://192.168.1.15:5000`).
-
-### (Optional) Step 6: Run on Boot
-To make the app start automatically when the Pi turns on, you can use a systemd service.
-
-1. Create a service file:
+**Production (24/7 mit Gunicorn):**
 ```bash
-sudo nano /etc/systemd/system/inventory.service
+gunicorn -w 2 -b 0.0.0.0:5000 --timeout 120 app:app
+# -w 2 = 2 Worker (für Pi Zero/3)
+# -w 4 = 4 Worker (für Pi 4/5)
 ```
 
-2. Paste the following (adjust paths if necessary):
+### Autostart einrichten (Systemd Service mit Gunicorn)
+
+1. **Service-Datei erstellen**
+```bash
+sudo nano /etc/systemd/system/nexosync.service
+```
+
+2. **Konfiguration einfügen**
 ```ini
 [Unit]
-Description=Smart Kitchen Inventory
+Description=NexoSync Smart Kitchen Inventory
 After=network.target
 
 [Service]
+Type=notify
 User=pi
-WorkingDirectory=/home/pi/inventory
-Environment="PATH=/home/pi/inventory/venv/bin"
-ExecStart=/home/pi/inventory/venv/bin/python app.py
+WorkingDirectory=/home/pi/HeimInventar
+Environment="PATH=/home/pi/HeimInventar/venv/bin"
+ExecStart=/home/pi/HeimInventar/venv/bin/gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app
 Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+**Anpassungen je nach Raspberry Pi Modell:**
+- **Pi Zero/3**: `-w 2` (2 Worker)
+- **Pi 4 (2GB)**: `-w 3` (3 Worker)
+- **Pi 4 (4GB+)**: `-w 4` (4 Worker)
+- **Pi 5**: `-w 6` (6 Worker)
 
 3. **Service aktivieren**
 ```bash
@@ -543,6 +583,7 @@ sudo systemctl status nexosync
 sudo systemctl stop nexosync      # Stoppen
 sudo systemctl restart nexosync   # Neustarten
 sudo journalctl -u nexosync -f    # Logs anzeigen
+sudo systemctl status nexosync    # Status prüfen
 ```
 
 ### Performance-Optimierung für Raspberry Pi
